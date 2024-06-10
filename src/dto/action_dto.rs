@@ -7,10 +7,11 @@ pub struct ActionDTO {
     pub side: ActionSide,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub enum ActionSide {
     Client,
     Server,
     Both,
     Debug,
 }
+
