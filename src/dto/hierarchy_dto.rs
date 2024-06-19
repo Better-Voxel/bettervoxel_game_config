@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use bevy_render::color::Color;
 
 use bevy_transform::prelude::Transform;
 use serde::{Deserialize, Serialize};
@@ -26,7 +27,8 @@ pub enum GameElementTypeDTO {
 #[cfg_attr(test, derive(PartialEq))]
 pub struct PartDTO {
     #[serde(flatten)]
-    pub transform: Transform
+    pub transform: Transform,
+    pub color: Color,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,6 +42,7 @@ pub struct ScriptDTO {
 #[cfg(test)]
 mod tests {
     use bevy_math::{Quat, Vec3};
+    use bevy_render::color::Color;
     use bevy_transform::prelude::Transform;
     use crate::dto::hierarchy_dto::PartDTO;
 
@@ -48,13 +51,23 @@ mod tests {
             translation: Vec3::new(1., 2., 3.),
             scale: Vec3::new(1., -1., 0.5),
             rotation: Quat::IDENTITY
-        }
+        },
+        color: Color::DARK_GRAY
     };
+
     const PART_JSON: &'static str = r#"
             {
                 "translation": [1, 2, 3],
                 "scale": [1, -1, 0.5],
-                "rotation": [0, 0, 0, 1]
+                "rotation": [0, 0, 0, 1],
+                "color": {
+                    "Rgba": {
+                        "red": 0.25,
+                        "green": 0.25,
+                        "blue": 0.25,
+                        "alpha": 1.0
+                    }
+                }
             }"#;
 
     #[test]
