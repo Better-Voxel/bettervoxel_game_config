@@ -51,12 +51,26 @@ pub struct PlayerPrefabDTO {
     pub camera_look_at: Vec3,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct LightDTO {
+    pub color: Color,
+    pub intensity: f32,
+    pub range: f32,
+    pub radius: f32,
+    pub shadows_enabled: bool,
+    pub shadow_depth_bias: f32,
+    pub shadow_normal_bias: f32,
+    pub outer_angle: f32,
+    pub inner_angle: f32,
+}
+
 #[cfg(test)]
 mod tests {
     use bevy_math::{Quat, Vec3};
     use bevy_render::color::Color;
     use bevy_transform::prelude::Transform;
-    use crate::dto::hierarchy_dto::{PartDTO, PlayerPrefabDTO};
+    use crate::dto::hierarchy_dto::{LightDTO, PartDTO, PlayerPrefabDTO};
 
     const PART: PartDTO = PartDTO {
         transform: Transform {
@@ -112,7 +126,6 @@ mod tests {
     #[test]
     fn test_serialize_player_prefab() {
         let player_json = serde_json::to_string(&PLAYER).unwrap();
-        println!("{player_json}");
         assert_eq!(PLAYER_JSON, player_json);
     }
 
@@ -120,5 +133,35 @@ mod tests {
     fn test_deserialize_player_prefab() {
         let player = serde_json::from_str(&PLAYER_JSON).unwrap();
         assert_eq!(PLAYER, player);
+    }
+
+    const LIGHT: LightDTO = LightDTO {
+        color: Color::Rgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 0.0,
+        },
+        intensity: 0.0,
+        range: 0.0,
+        radius: 0.0,
+        shadows_enabled: false,
+        shadow_depth_bias: 0.0,
+        shadow_normal_bias: 0.0,
+        outer_angle: 0.0,
+        inner_angle: 0.0,
+    };
+    const LIGHT_JSON: &'static str = r#"{"color":{"Rgba":{"red":0.0,"green":0.0,"blue":0.0,"alpha":0.0}},"intensity":0.0,"range":0.0,"radius":0.0,"shadows_enabled":false,"shadow_depth_bias":0.0,"shadow_normal_bias":0.0,"outer_angle":0.0,"inner_angle":0.0}"#;
+
+    #[test]
+    fn serialize_light() {
+        let light_json = serde_json::to_string(&LIGHT).unwrap();
+        assert_eq!(LIGHT_JSON, light_json);
+    }
+
+    #[test]
+    fn deserialize_light() {
+        let light = serde_json::from_str(LIGHT_JSON).unwrap();
+        assert_eq!(LIGHT, light);
     }
 }
