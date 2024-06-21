@@ -22,7 +22,8 @@ pub enum GameElementTypeDTO {
     Part(PartDTO),
     Folder(FolderDTO),
     Script(ScriptDTO),
-    PlayerPrefab(PlayerPrefabDTO)
+    PlayerPrefab(PlayerPrefabDTO),
+    Light(LightDTO)
 }
 
 #[derive(Serialize, Deserialize, Debug)]
