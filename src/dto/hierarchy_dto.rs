@@ -54,16 +54,45 @@ pub struct PlayerPrefabDTO {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct LightDTO {
+pub struct SpotLightDTO {
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
-    pub radius: f32,
     pub shadows_enabled: bool,
-    pub shadow_depth_bias: f32,
-    pub shadow_normal_bias: f32,
     pub outer_angle: f32,
     pub inner_angle: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct PointLightDTO {
+    pub color: Color,
+    pub intensity: f32,
+    pub range: f32,
+    pub shadows_enabled: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct DirectionalLightDTO {
+    pub color: Color,
+    pub illuminance: f32,
+    pub shadows_enabled: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum LightTypeDTO {
+    PointLight(PointLightDTO),
+    SpotLight(SpotLightDTO),
+    DirectionalLight(DirectionalLightDTO)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct LightDTO {
+    pub transform: Transform,
+    pub light: LightTypeDTO
 }
 
 #[cfg(test)]
@@ -71,7 +100,7 @@ mod tests {
     use bevy_math::{Quat, Vec3};
     use bevy_render::color::Color;
     use bevy_transform::prelude::Transform;
-    use crate::dto::hierarchy_dto::{LightDTO, PartDTO, PlayerPrefabDTO};
+    use crate::dto::hierarchy_dto::{LightDTO, LightTypeDTO, PartDTO, PlayerPrefabDTO, SpotLightDTO};
 
     const PART: PartDTO = PartDTO {
         transform: Transform {
@@ -137,22 +166,21 @@ mod tests {
     }
 
     const LIGHT: LightDTO = LightDTO {
-        color: Color::Rgba {
-            red: 0.0,
-            green: 0.0,
-            blue: 0.0,
-            alpha: 0.0,
+        transform: Transform {
+            translation: Vec3::ZERO,
+            rotation: Quat::IDENTITY,
+            scale: Vec3::ZERO,
         },
-        intensity: 0.0,
-        range: 0.0,
-        radius: 0.0,
-        shadows_enabled: false,
-        shadow_depth_bias: 0.0,
-        shadow_normal_bias: 0.0,
-        outer_angle: 0.0,
-        inner_angle: 0.0,
+        light: LightTypeDTO::SpotLight(SpotLightDTO {
+            color: Color::DARK_GRAY,
+            intensity: 0.0,
+            range: 0.0,
+            shadows_enabled: false,
+            outer_angle: 0.0,
+            inner_angle: 0.0,
+        }),
     };
-    const LIGHT_JSON: &'static str = r#"{"color":{"Rgba":{"red":0.0,"green":0.0,"blue":0.0,"alpha":0.0}},"intensity":0.0,"range":0.0,"radius":0.0,"shadows_enabled":false,"shadow_depth_bias":0.0,"shadow_normal_bias":0.0,"outer_angle":0.0,"inner_angle":0.0}"#;
+    const LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"light":{"SpotLight":{"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"shadows_enabled":false,"outer_angle":0.0,"inner_angle":0.0}}}"#;
 
     #[test]
     fn serialize_light() {
