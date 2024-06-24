@@ -23,7 +23,9 @@ pub enum GameElementTypeDTO {
     Folder(FolderDTO),
     Script(ScriptDTO),
     PlayerPrefab(PlayerPrefabDTO),
-    Light(LightDTO)
+    SpotLight(SpotLightDTO),
+    PointLight(PointLightDTO),
+    DirectionalLight(DirectionalLightDTO),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -55,6 +57,7 @@ pub struct PlayerPrefabDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct SpotLightDTO {
+    pub transform: Transform,
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
@@ -66,6 +69,7 @@ pub struct SpotLightDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct PointLightDTO {
+    pub transform: Transform,
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
@@ -75,24 +79,10 @@ pub struct PointLightDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct DirectionalLightDTO {
+    pub transform: Transform,
     pub color: Color,
     pub illuminance: f32,
     pub shadows_enabled: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(test, derive(PartialEq))]
-pub enum LightTypeDTO {
-    PointLight(PointLightDTO),
-    SpotLight(SpotLightDTO),
-    DirectionalLight(DirectionalLightDTO)
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(test, derive(PartialEq))]
-pub struct LightDTO {
-    pub transform: Transform,
-    pub light: LightTypeDTO
 }
 
 #[cfg(test)]
@@ -100,7 +90,7 @@ mod tests {
     use bevy_math::{Quat, Vec3};
     use bevy_render::color::Color;
     use bevy_transform::prelude::Transform;
-    use crate::dto::hierarchy_dto::{LightDTO, LightTypeDTO, PartDTO, PlayerPrefabDTO, SpotLightDTO};
+    use crate::dto::hierarchy_dto::{DirectionalLightDTO, PartDTO, PlayerPrefabDTO, PointLightDTO, SpotLightDTO};
 
     const PART: PartDTO = PartDTO {
         transform: Transform {
@@ -165,32 +155,82 @@ mod tests {
         assert_eq!(PLAYER, player);
     }
 
-    const LIGHT: LightDTO = LightDTO {
+    const SPOT_LIGHT: SpotLightDTO = SpotLightDTO {
         transform: Transform {
             translation: Vec3::ZERO,
             rotation: Quat::IDENTITY,
             scale: Vec3::ZERO,
         },
-        light: LightTypeDTO::SpotLight(SpotLightDTO {
-            color: Color::DARK_GRAY,
-            intensity: 0.0,
-            range: 0.0,
-            shadows_enabled: false,
-            outer_angle: 0.0,
-            inner_angle: 0.0,
-        }),
+        color: Color::DARK_GRAY,
+        intensity: 0.0,
+        range: 0.0,
+        shadows_enabled: false,
+        outer_angle: 0.0,
+        inner_angle: 0.0,
     };
-    const LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"light":{"SpotLight":{"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"shadows_enabled":false,"outer_angle":0.0,"inner_angle":0.0}}}"#;
+    const SPOT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"shadows_enabled":false,"outer_angle":0.0,"inner_angle":0.0}"#;
 
     #[test]
-    fn serialize_light() {
-        let light_json = serde_json::to_string(&LIGHT).unwrap();
-        assert_eq!(LIGHT_JSON, light_json);
+    fn serialize_spot_light() {
+        let spot_light_json = serde_json::to_string(&SPOT_LIGHT).unwrap();
+        println!("{:?}", spot_light_json);
+        assert_eq!(SPOT_LIGHT_JSON, spot_light_json);
     }
 
     #[test]
-    fn deserialize_light() {
-        let light = serde_json::from_str(LIGHT_JSON).unwrap();
-        assert_eq!(LIGHT, light);
+    fn deserialize_spot_light() {
+        let spot_light = serde_json::from_str(SPOT_LIGHT_JSON).unwrap();
+        assert_eq!(SPOT_LIGHT, spot_light);
+    }
+
+    const POINT_LIGHT: PointLightDTO = PointLightDTO {
+        transform: Transform {
+            translation: Vec3::ZERO,
+            rotation: Quat::IDENTITY,
+            scale: Vec3::ZERO,
+        },
+        color: Color::DARK_GRAY,
+        intensity: 0.0,
+        range: 0.0,
+        shadows_enabled: false,
+    };
+    const POINT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"shadows_enabled":false}"#;
+
+    #[test]
+    fn serialize_point_light() {
+        let point_light_json = serde_json::to_string(&POINT_LIGHT).unwrap();
+        println!("{:?}", point_light_json);
+        assert_eq!(POINT_LIGHT_JSON, point_light_json);
+    }
+
+    #[test]
+    fn deserialize_point_light() {
+        let point_light = serde_json::from_str(SPOT_LIGHT_JSON).unwrap();
+        assert_eq!(POINT_LIGHT, point_light);
+    }
+
+    const DIRECTIONAL_LIGHT: DirectionalLightDTO = DirectionalLightDTO {
+        transform: Transform {
+            translation: Vec3::ZERO,
+            rotation: Quat::IDENTITY,
+            scale: Vec3::ZERO,
+        },
+        color: Color::DARK_GRAY,
+        illuminance: 0.0,
+        shadows_enabled: false,
+    };
+    const DIRECTIONAL_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"illuminance":0.0,"shadows_enabled":false}"#;
+
+    #[test]
+    fn serialize_directional_light() {
+        let directional_light_json = serde_json::to_string(&DIRECTIONAL_LIGHT).unwrap();
+        println!("{:?}", directional_light_json);
+        assert_eq!(DIRECTIONAL_LIGHT_JSON, directional_light_json);
+    }
+
+    #[test]
+    fn deserialize_directional_light() {
+        let directional_light = serde_json::from_str(DIRECTIONAL_LIGHT_JSON).unwrap();
+        assert_eq!(DIRECTIONAL_LIGHT, directional_light);
     }
 }
