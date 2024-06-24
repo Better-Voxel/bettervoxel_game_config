@@ -47,8 +47,8 @@ pub struct ScriptDTO {
 #[cfg_attr(test, derive(PartialEq))]
 pub struct PlayerPrefabDTO {
     pub position: Vec3,
-    pub hauteur: f32,
-    pub rayon: f32,
+    pub height: f32,
+    pub radius: f32,
     pub camera_offset: Vec3,
     pub camera_look_at: Vec3,
 }
@@ -118,8 +118,8 @@ mod tests {
             y: 0.0,
             z: 0.0,
         },
-        hauteur: 1.8,
-        rayon: 1.0,
+        height: 1.8,
+        radius: 1.0,
         camera_offset: Vec3 {
             x: 0.0,
             y: 0.0,
@@ -132,7 +132,7 @@ mod tests {
         },
     };
 
-    const PLAYER_JSON: & str = r#"{"position":[0.0,0.0,0.0],"hauteur":1.8,"rayon":1.0,"camera_offset":[0.0,0.0,0.0],"camera_look_at":[0.0,0.0,0.0]}"#;
+    const PLAYER_JSON: & str = r#"{"position":[0.0,0.0,0.0],"height":1.8,"radius":1.0,"camera_offset":[0.0,0.0,0.0],"camera_look_at":[0.0,0.0,0.0]}"#;
     #[test]
     fn test_serialize_player_prefab() {
         let player_json = serde_json::to_string(&PLAYER).unwrap();
