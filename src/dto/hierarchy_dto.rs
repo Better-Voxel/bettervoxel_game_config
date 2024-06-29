@@ -60,6 +60,7 @@ pub struct SpotLightDTO {
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
+    pub radius: f32,
     pub shadows_enabled: bool,
     pub outer_angle: f32,
     pub inner_angle: f32,
@@ -72,6 +73,7 @@ pub struct PointLightDTO {
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
+    pub radius: f32,
     pub shadows_enabled: bool,
 }
 
@@ -154,11 +156,12 @@ mod tests {
         color: Color::DARK_GRAY,
         intensity: 0.0,
         range: 0.0,
+        radius: 0.0,
         shadows_enabled: false,
         outer_angle: 0.0,
         inner_angle: 0.0,
     };
-    const SPOT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"shadows_enabled":false,"outer_angle":0.0,"inner_angle":0.0}"#;
+    const SPOT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"radius":0.0,"shadows_enabled":false,"outer_angle":0.0,"inner_angle":0.0}"#;
 
     #[test]
     fn serialize_spot_light() {
@@ -182,9 +185,10 @@ mod tests {
         color: Color::DARK_GRAY,
         intensity: 0.0,
         range: 0.0,
+        radius: 0.0,
         shadows_enabled: false,
     };
-    const POINT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"shadows_enabled":false}"#;
+    const POINT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"radius":0.0,"shadows_enabled":false}"#;
 
     #[test]
     fn serialize_point_light() {
