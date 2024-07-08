@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use bevy_color::Color;
 use bevy_math::Vec3;
-use bevy_render::color::Color;
 
 use bevy_transform::prelude::Transform;
 use serde::{Deserialize, Serialize};
@@ -79,8 +79,9 @@ pub struct PointLightDTO {
 
 #[cfg(test)]
 mod tests {
+    use bevy_color::Color;
+    use bevy_color::palettes::css::DARK_GRAY;
     use bevy_math::{Quat, Vec3};
-    use bevy_render::color::Color;
     use bevy_transform::prelude::Transform;
     use crate::dto::hierarchy_dto::{PartDTO, PlayerPrefabDTO, PointLightDTO, SpotLightDTO};
 
@@ -90,7 +91,7 @@ mod tests {
             scale: Vec3::new(1., -1., 0.5),
             rotation: Quat::IDENTITY
         },
-        color: Color::DARK_GRAY
+        color: DARK_GRAY.into()
     };
 
     const PART_JSON: &'static str = r#"
@@ -153,7 +154,7 @@ mod tests {
             rotation: Quat::IDENTITY,
             scale: Vec3::ZERO,
         },
-        color: Color::DARK_GRAY,
+        color: DARK_GRAY.into(),
         intensity: 0.0,
         range: 0.0,
         radius: 0.0,
@@ -182,7 +183,7 @@ mod tests {
             rotation: Quat::IDENTITY,
             scale: Vec3::ZERO,
         },
-        color: Color::DARK_GRAY,
+        color: DARK_GRAY.into(),
         intensity: 0.0,
         range: 0.0,
         radius: 0.0,
