@@ -25,7 +25,6 @@ pub enum GameElementTypeDTO {
     PlayerPrefab(PlayerPrefabDTO),
     SpotLight(SpotLightDTO),
     PointLight(PointLightDTO),
-    Skybox(SkyboxDTO),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -76,23 +75,6 @@ pub struct PointLightDTO {
     pub range: f32,
     pub radius: f32,
     pub shadows_enabled: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct SkyboxDTO {
-    pub cube_map: CubeMapDTO,
-    pub environment_map_light: Option<EnvironmentMapLightDTO>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CubeMapDTO {
-    pub texture: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct EnvironmentMapLightDTO {
-    pub specular: String,
-    pub diffuse: String,
 }
 
 #[cfg(test)]

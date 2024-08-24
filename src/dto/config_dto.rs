@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::dto::hierarchy_dto::GameElementDTO;
 use crate::dto::{ActionDTO, AssetDTO, KeyBindDTO, Type, TypeDTO};
+use crate::dto::terrain_dto::TerrainDTO;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigDTO {
@@ -12,6 +13,7 @@ pub struct ConfigDTO {
     pub actions: HashMap<String, ActionDTO>,
     pub keybinds: HashMap<String, KeyBindDTO>,
     pub hierarchy: Vec<GameElementDTO>,
+    pub terrain: TerrainDTO,
 }
 
 
