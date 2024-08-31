@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use bevy_color::Color;
 use bevy_math::Vec3;
+use std::collections::HashMap;
 
 use bevy_transform::prelude::Transform;
 use serde::{Deserialize, Serialize};
@@ -8,8 +8,16 @@ use serde::{Deserialize, Serialize};
 use crate::dto::TypeDTO;
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "type", rename_all = "PascalCase", content = "value")]
+pub enum PositionType {
+    Transform(Transform),
+    Position(Vec3),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GameElementDTO {
     pub name: String,
+    pub position: Option<PositionType>,
     pub value: GameElementTypeDTO,
     pub children: Option<Vec<GameElementDTO>>,
     #[serde(skip_deserializing)]
@@ -30,8 +38,6 @@ pub enum GameElementTypeDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct PartDTO {
-    #[serde(flatten)]
-    pub transform: Transform,
     pub size: Vec3,
     pub color: Color,
 }
@@ -47,7 +53,6 @@ pub struct ScriptDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct PlayerPrefabDTO {
-    pub position: Vec3,
     pub height: f32,
     pub radius: f32,
     pub camera_offset: Vec3,
@@ -57,7 +62,6 @@ pub struct PlayerPrefabDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct SpotLightDTO {
-    pub transform: Transform,
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
@@ -70,7 +74,6 @@ pub struct SpotLightDTO {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct PointLightDTO {
-    pub transform: Transform,
     pub color: Color,
     pub intensity: f32,
     pub range: f32,
@@ -81,31 +84,24 @@ pub struct PointLightDTO {
 #[cfg(test)]
 mod tests {
     use bevy_color::Color;
-    use bevy_color::palettes::css::DARK_GRAY;
-    use bevy_math::{Quat, Vec3};
-    use bevy_transform::prelude::Transform;
     use crate::dto::hierarchy_dto::{PartDTO, PlayerPrefabDTO, PointLightDTO, SpotLightDTO};
+    use bevy_color::palettes::css::AQUA;
+    use bevy_math::Vec3;
+    use serde_json::Value;
 
     const PART: PartDTO = PartDTO {
-        transform: Transform {
-            translation: Vec3::new(1., 2., 3.),
-            scale: Vec3::new(1., 1., 1.),
-            rotation: Quat::IDENTITY
-        },
         size: Vec3::new(1., 3., 0.5),
-        color: DARK_GRAY.into()
+        color: Color::Srgba(AQUA),
     };
 
     const PART_JSON: &str = r#"
             {
-                "translation": [1, 2, 3],
-                "scale": [1, -1, 0.5],
-                "rotation": [0, 0, 0, 1],
+                "size": [1, 3, 0.5],
                 "color": {
-                    "Rgba": {
-                        "red": 0.25,
-                        "green": 0.25,
-                        "blue": 0.25,
+                    "Srgba": {
+                        "red": 0.0,
+                        "green": 1.0,
+                        "blue": 1.0,
                         "alpha": 1.0
                     }
                 }
@@ -118,12 +114,7 @@ mod tests {
     }
 
     const PLAYER: PlayerPrefabDTO = PlayerPrefabDTO {
-        position: Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        },
-        height: 1.8,
+        height: 2.0,
         radius: 1.0,
         camera_offset: Vec3 {
             x: 0.0,
@@ -137,11 +128,18 @@ mod tests {
         },
     };
 
-    const PLAYER_JSON: & str = r#"{"position":[0.0,0.0,0.0],"height":1.8,"radius":1.0,"camera_offset":[0.0,0.0,0.0],"camera_look_at":[0.0,0.0,0.0]}"#;
+    const PLAYER_JSON: &str = r#"{
+        "height": 2.0,
+        "radius": 1.0,
+        "camera_offset": [0.0,0.0,0.0],
+        "camera_look_at": [0.0,0.0,0.0]
+    }"#;
     #[test]
     fn test_serialize_player_prefab() {
-        let player_json = serde_json::to_string(&PLAYER).unwrap();
-        assert_eq!(PLAYER_JSON, player_json);
+        let player_prefab = serde_json::to_value(&PLAYER).unwrap();
+        let player_prefab_json: Value = serde_json::from_str(PLAYER_JSON).unwrap();
+        println!("{:?}", player_prefab);
+        assert_eq!(player_prefab_json, player_prefab);
     }
 
     #[test]
@@ -151,12 +149,7 @@ mod tests {
     }
 
     const SPOT_LIGHT: SpotLightDTO = SpotLightDTO {
-        transform: Transform {
-            translation: Vec3::ZERO,
-            rotation: Quat::IDENTITY,
-            scale: Vec3::ZERO,
-        },
-        color: DARK_GRAY.into(),
+        color: Color::Srgba(AQUA),
         intensity: 0.0,
         range: 0.0,
         radius: 0.0,
@@ -164,13 +157,29 @@ mod tests {
         outer_angle: 0.0,
         inner_angle: 0.0,
     };
-    const SPOT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"radius":0.0,"shadows_enabled":false,"outer_angle":0.0,"inner_angle":0.0}"#;
+    const SPOT_LIGHT_JSON: &str = r#"{
+        "color": {
+            "Srgba": {
+                "red": 0.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+            }
+        },
+        "intensity": 0.0,
+        "range": 0.0,
+        "radius": 0.0,
+        "shadows_enabled": false,
+        "outer_angle": 0.0,
+        "inner_angle": 0.0
+    }"#;
 
     #[test]
     fn serialize_spot_light() {
-        let spot_light_json = serde_json::to_string(&SPOT_LIGHT).unwrap();
-        println!("{:?}", spot_light_json);
-        assert_eq!(SPOT_LIGHT_JSON, spot_light_json);
+        let spot_light = serde_json::to_value(&SPOT_LIGHT).unwrap();
+        let spot_light_json: Value = serde_json::from_str(SPOT_LIGHT_JSON).unwrap();
+        println!("{:?}", spot_light);
+        assert_eq!(spot_light_json, spot_light);
     }
 
     #[test]
@@ -180,29 +189,38 @@ mod tests {
     }
 
     const POINT_LIGHT: PointLightDTO = PointLightDTO {
-        transform: Transform {
-            translation: Vec3::ZERO,
-            rotation: Quat::IDENTITY,
-            scale: Vec3::ZERO,
-        },
-        color: DARK_GRAY.into(),
+        color: Color::Srgba(AQUA),
         intensity: 0.0,
         range: 0.0,
         radius: 0.0,
         shadows_enabled: false,
     };
-    const POINT_LIGHT_JSON: &'static str = r#"{"transform":{"translation":[0.0,0.0,0.0],"rotation":[0.0,0.0,0.0,1.0],"scale":[0.0,0.0,0.0]},"color":{"Rgba":{"red":0.25,"green":0.25,"blue":0.25,"alpha":1.0}},"intensity":0.0,"range":0.0,"radius":0.0,"shadows_enabled":false}"#;
+    const POINT_LIGHT_JSON: &str = r#"{
+        "color": {
+            "Srgba": {
+                "red": 0.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+            }
+        },
+        "intensity": 0.0,
+        "range": 0.0,
+        "radius": 0.0,
+        "shadows_enabled": false
+    }"#;
 
     #[test]
     fn serialize_point_light() {
-        let point_light_json = serde_json::to_string(&POINT_LIGHT).unwrap();
-        println!("{:?}", point_light_json);
-        assert_eq!(POINT_LIGHT_JSON, point_light_json);
+        let point_light = serde_json::to_value(&POINT_LIGHT).unwrap();
+        let point_light_json: Value = serde_json::from_str(POINT_LIGHT_JSON).unwrap();
+        println!("{:?}", point_light);
+        assert_eq!(point_light_json, point_light);
     }
 
     #[test]
     fn deserialize_point_light() {
-        let point_light = serde_json::from_str(SPOT_LIGHT_JSON).unwrap();
+        let point_light = serde_json::from_str(POINT_LIGHT_JSON).unwrap();
         assert_eq!(POINT_LIGHT, point_light);
     }
 }
