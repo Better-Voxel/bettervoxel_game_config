@@ -32,6 +32,7 @@ pub enum GameElementTypeDTO {
 pub struct PartDTO {
     #[serde(flatten)]
     pub transform: Transform,
+    pub size: Vec3,
     pub color: Color,
 }
 
@@ -88,13 +89,14 @@ mod tests {
     const PART: PartDTO = PartDTO {
         transform: Transform {
             translation: Vec3::new(1., 2., 3.),
-            scale: Vec3::new(1., -1., 0.5),
+            scale: Vec3::new(1., 1., 1.),
             rotation: Quat::IDENTITY
         },
+        size: Vec3::new(1., 3., 0.5),
         color: DARK_GRAY.into()
     };
 
-    const PART_JSON: &'static str = r#"
+    const PART_JSON: &str = r#"
             {
                 "translation": [1, 2, 3],
                 "scale": [1, -1, 0.5],
