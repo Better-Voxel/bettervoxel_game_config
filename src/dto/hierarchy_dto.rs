@@ -20,6 +20,7 @@ pub struct GameElementDTO {
     pub position: Option<PositionType>,
     pub value: GameElementTypeDTO,
     pub children: Option<Vec<GameElementDTO>>,
+    pub anchor: Option<bool>,
     #[serde(skip_deserializing)]
     pub attributes: Option<HashMap<String, TypeDTO>>,
 }
@@ -40,10 +41,11 @@ pub enum GameElementTypeDTO {
 pub struct PartDTO {
     pub size: Vec3,
     pub color: Color,
+    pub is_static: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct FolderDTO {}
+pub struct FolderDTO;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ScriptDTO {
@@ -92,6 +94,7 @@ mod tests {
     const PART: PartDTO = PartDTO {
         size: Vec3::new(1., 3., 0.5),
         color: Color::Srgba(AQUA),
+        is_static: None,
     };
 
     const PART_JSON: &str = r#"
