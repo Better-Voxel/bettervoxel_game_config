@@ -1,23 +1,15 @@
 use bevy_color::Color;
-use bevy_math::Vec3;
+use bevy_math::{IVec3, Vec3};
 use std::collections::HashMap;
 
+use crate::dto::asset_dto::AssetId;
+use crate::dto::TypeDTO;
 use bevy_transform::prelude::Transform;
 use serde::{Deserialize, Serialize};
-
-use crate::dto::TypeDTO;
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "type", rename_all = "PascalCase", content = "value")]
-pub enum PositionType {
-    Transform(Transform),
-    Position(Vec3),
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GameElementDTO {
     pub name: String,
-    pub position: Option<PositionType>,
     pub value: GameElementTypeDTO,
     pub children: Option<Vec<GameElementDTO>>,
     #[serde(skip_deserializing)]
@@ -30,9 +22,11 @@ pub enum GameElementTypeDTO {
     Part(PartDTO),
     Folder(FolderDTO),
     Script(ScriptDTO),
-    PlayerPrefab(PlayerPrefabDTO),
+    // PlayerPrefab(PlayerPrefabDTO),
     SpotLight(SpotLightDTO),
     PointLight(PointLightDTO),
+    Prop(PropDTO),
+    Structure(StructureDTO),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,6 +34,7 @@ pub enum GameElementTypeDTO {
 pub struct PartDTO {
     pub size: Vec3,
     pub color: Color,
+    pub position: Transform,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,7 +42,7 @@ pub struct FolderDTO {}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ScriptDTO {
-    pub script: String,
+    pub asset_id: AssetId,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -81,17 +76,35 @@ pub struct PointLightDTO {
     pub shadows_enabled: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct PropDTO {
+    pub asset_id: AssetId,
+    pub position: IVec3,
+    pub rotation: IVec3,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct StructureDTO {
+    pub asset_id: AssetId,
+    pub position: IVec3,
+    pub rotation: IVec3,
+}
+
 #[cfg(test)]
 mod tests {
-    use bevy_color::Color;
     use crate::dto::hierarchy_dto::{PartDTO, PlayerPrefabDTO, PointLightDTO, SpotLightDTO};
     use bevy_color::palettes::css::AQUA;
+    use bevy_color::Color;
     use bevy_math::Vec3;
+    use bevy_transform::prelude::Transform;
     use serde_json::Value;
 
     const PART: PartDTO = PartDTO {
         size: Vec3::new(1., 3., 0.5),
         color: Color::Srgba(AQUA),
+        position: Transform::from_xyz(1., 2., 3.),
     };
 
     const PART_JSON: &str = r#"
