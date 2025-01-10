@@ -45,14 +45,14 @@ pub struct ScriptDTO {
     pub asset_id: AssetId,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(test, derive(PartialEq))]
-pub struct PlayerPrefabDTO {
-    pub height: f32,
-    pub radius: f32,
-    pub camera_offset: Vec3,
-    pub camera_look_at: Vec3,
-}
+// #[derive(Serialize, Deserialize, Debug)]
+// #[cfg_attr(test, derive(PartialEq))]
+// pub struct PlayerPrefabDTO {
+//     pub height: f32,
+//     pub radius: f32,
+//     pub camera_offset: Vec3,
+//     pub camera_look_at: Vec3,
+// }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -64,6 +64,7 @@ pub struct SpotLightDTO {
     pub shadows_enabled: bool,
     pub outer_angle: f32,
     pub inner_angle: f32,
+    pub position: Transform,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -74,6 +75,7 @@ pub struct PointLightDTO {
     pub range: f32,
     pub radius: f32,
     pub shadows_enabled: bool,
+    pub position: Transform,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -94,7 +96,7 @@ pub struct StructureDTO {
 
 #[cfg(test)]
 mod tests {
-    use crate::dto::hierarchy_dto::{PartDTO, PlayerPrefabDTO, PointLightDTO, SpotLightDTO};
+    use crate::dto::hierarchy_dto::{PartDTO, PointLightDTO, SpotLightDTO};
     use bevy_color::palettes::css::AQUA;
     use bevy_color::Color;
     use bevy_math::Vec3;
@@ -117,6 +119,11 @@ mod tests {
                         "blue": 1.0,
                         "alpha": 1.0
                     }
+                },
+                "position": {
+                    "translation": [1.0, 2.0, 3.0],
+                    "rotation": [0.0, 0.0, 0.0, 1.0],
+                    "scale": [1.0, 1.0, 1.0]
                 }
             }"#;
 
@@ -126,40 +133,40 @@ mod tests {
         assert_eq!(PART, part);
     }
 
-    const PLAYER: PlayerPrefabDTO = PlayerPrefabDTO {
-        height: 2.0,
-        radius: 1.0,
-        camera_offset: Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        },
-        camera_look_at: Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        },
-    };
+    // const PLAYER: PlayerPrefabDTO = PlayerPrefabDTO {
+    //     height: 2.0,
+    //     radius: 1.0,
+    //     camera_offset: Vec3 {
+    //         x: 0.0,
+    //         y: 0.0,
+    //         z: 0.0,
+    //     },
+    //     camera_look_at: Vec3 {
+    //         x: 0.0,
+    //         y: 0.0,
+    //         z: 0.0,
+    //     },
+    // };
 
-    const PLAYER_JSON: &str = r#"{
-        "height": 2.0,
-        "radius": 1.0,
-        "camera_offset": [0.0,0.0,0.0],
-        "camera_look_at": [0.0,0.0,0.0]
-    }"#;
-    #[test]
-    fn test_serialize_player_prefab() {
-        let player_prefab = serde_json::to_value(&PLAYER).unwrap();
-        let player_prefab_json: Value = serde_json::from_str(PLAYER_JSON).unwrap();
-        println!("{:?}", player_prefab);
-        assert_eq!(player_prefab_json, player_prefab);
-    }
-
-    #[test]
-    fn test_deserialize_player_prefab() {
-        let player = serde_json::from_str(&PLAYER_JSON).unwrap();
-        assert_eq!(PLAYER, player);
-    }
+    // const PLAYER_JSON: &str = r#"{
+    //     "height": 2.0,
+    //     "radius": 1.0,
+    //     "camera_offset": [0.0,0.0,0.0],
+    //     "camera_look_at": [0.0,0.0,0.0]
+    // }"#;
+    // #[test]
+    // fn test_serialize_player_prefab() {
+    //     let player_prefab = serde_json::to_value(&PLAYER).unwrap();
+    //     let player_prefab_json: Value = serde_json::from_str(PLAYER_JSON).unwrap();
+    //     println!("{:?}", player_prefab);
+    //     assert_eq!(player_prefab_json, player_prefab);
+    // }
+    //
+    // #[test]
+    // fn test_deserialize_player_prefab() {
+    //     let player = serde_json::from_str(&PLAYER_JSON).unwrap();
+    //     assert_eq!(PLAYER, player);
+    // }
 
     const SPOT_LIGHT: SpotLightDTO = SpotLightDTO {
         color: Color::Srgba(AQUA),
@@ -169,6 +176,7 @@ mod tests {
         shadows_enabled: false,
         outer_angle: 0.0,
         inner_angle: 0.0,
+        position: Transform::from_xyz(1., 2., 3.)
     };
     const SPOT_LIGHT_JSON: &str = r#"{
         "color": {
@@ -184,7 +192,12 @@ mod tests {
         "radius": 0.0,
         "shadows_enabled": false,
         "outer_angle": 0.0,
-        "inner_angle": 0.0
+        "inner_angle": 0.0,
+        "position": {
+            "translation": [1.0, 2.0, 3.0],
+            "rotation": [0.0, 0.0, 0.0, 1.0],
+            "scale": [1.0, 1.0, 1.0]
+        }
     }"#;
 
     #[test]
@@ -207,6 +220,7 @@ mod tests {
         range: 0.0,
         radius: 0.0,
         shadows_enabled: false,
+        position: Transform::from_xyz(1., 2., 3.)
     };
     const POINT_LIGHT_JSON: &str = r#"{
         "color": {
@@ -220,7 +234,12 @@ mod tests {
         "intensity": 0.0,
         "range": 0.0,
         "radius": 0.0,
-        "shadows_enabled": false
+        "shadows_enabled": false,
+        "position": {
+            "translation": [1.0, 2.0, 3.0],
+            "rotation": [0.0, 0.0, 0.0, 1.0],
+            "scale": [1.0, 1.0, 1.0]
+        }
     }"#;
 
     #[test]
