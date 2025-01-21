@@ -4,7 +4,7 @@ use bson::oid::ObjectId;
 use bson::Uuid;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", rename_all = "PascalCase", content = "value")]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum AssetId {
@@ -25,7 +25,7 @@ pub struct AssetDTO {
     pub asset_type: AssetType,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum AssetType {
     Image,
     Script,

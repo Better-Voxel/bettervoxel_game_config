@@ -7,7 +7,7 @@ pub struct TypeDTO {
     pub fields: HashMap<String, Type>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", rename_all = "PascalCase", content = "value")]
 pub enum Type {
     BOOLEAN(Option<bool>),
