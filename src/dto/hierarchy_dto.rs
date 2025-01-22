@@ -35,6 +35,7 @@ pub struct PartDTO {
     pub size: Vec3,
     pub color: Color,
     pub position: Transform,
+    pub gravity: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -107,6 +108,7 @@ mod tests {
         size: Vec3::new(1., 3., 0.5),
         color: Color::Srgba(AQUA),
         position: Transform::from_xyz(1., 2., 3.),
+        gravity: true,
     };
 
     const PART_JSON: &str = r#"
