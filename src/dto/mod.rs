@@ -9,5 +9,5 @@ pub mod asset_dto;
 pub mod config_dto;
 pub mod hierarchy_dto;
 pub mod keybind_dto;
-pub mod type_dto;
 pub mod terrain_dto;
+pub mod type_dto;

@@ -2,8 +2,8 @@ use bevy_color::Color;
 use bevy_math::{IVec3, Vec3};
 use std::collections::HashMap;
 
-use crate::dto::asset_dto::AssetId;
 use crate::dto::TypeDTO;
+use crate::dto::asset_dto::AssetId;
 use bevy_transform::prelude::Transform;
 use serde::{Deserialize, Serialize};
 
@@ -98,8 +98,8 @@ pub struct StructureDTO {
 #[cfg(test)]
 mod tests {
     use crate::dto::hierarchy_dto::{PartDTO, PointLightDTO, SpotLightDTO};
-    use bevy_color::palettes::css::AQUA;
     use bevy_color::Color;
+    use bevy_color::palettes::css::AQUA;
     use bevy_math::Vec3;
     use bevy_transform::prelude::Transform;
     use serde_json::Value;
@@ -178,7 +178,7 @@ mod tests {
         shadows_enabled: false,
         outer_angle: 0.0,
         inner_angle: 0.0,
-        position: Transform::from_xyz(1., 2., 3.)
+        position: Transform::from_xyz(1., 2., 3.),
     };
     const SPOT_LIGHT_JSON: &str = r#"{
         "color": {
@@ -222,7 +222,7 @@ mod tests {
         range: 0.0,
         radius: 0.0,
         shadows_enabled: false,
-        position: Transform::from_xyz(1., 2., 3.)
+        position: Transform::from_xyz(1., 2., 3.),
     };
     const POINT_LIGHT_JSON: &str = r#"{
         "color": {

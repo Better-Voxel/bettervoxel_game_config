@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::dto::hierarchy_dto::GameElementDTO;
-use crate::dto::{ActionDTO, AssetDTO, KeyBindDTO, Type, TypeDTO};
 use crate::dto::terrain_dto::TerrainDTO;
+use crate::dto::{ActionDTO, AssetDTO, KeyBindDTO, Type, TypeDTO};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigDTO {
@@ -16,7 +16,6 @@ pub struct ConfigDTO {
     pub terrain: TerrainDTO,
 }
 
-
 #[derive(Debug)]
 pub struct GameConfigError {
     message: String,
@@ -26,12 +25,11 @@ impl GameConfigError {
     pub fn with_string(message: String) -> Self {
         Self { message }
     }
-    
+
     pub fn get_message(&self) -> &str {
         &self.message
     }
 }
-
 
 impl ConfigDTO {
     pub fn check_circular_types(&self) -> Result<(), GameConfigError> {

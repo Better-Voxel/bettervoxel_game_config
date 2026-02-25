@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TerrainDTO {
-    pub skybox: Option<SkyboxDTO>
+    pub skybox: Option<SkyboxDTO>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

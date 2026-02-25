@@ -1,4 +1,4 @@
-use bevy_input::prelude::KeyCode;
+use bevy_input::keyboard::KeyCode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]

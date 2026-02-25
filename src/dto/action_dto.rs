@@ -14,4 +14,3 @@ pub enum ActionSide {
     Both,
     Debug,
 }
-

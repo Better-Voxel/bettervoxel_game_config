@@ -1,8 +1,8 @@
-use bson::serde_helpers::serialize_object_id_as_hex_string;
-use std::path::PathBuf;
-use bson::oid::ObjectId;
 use bson::Uuid;
+use bson::oid::ObjectId;
+use bson::serde_helpers::object_id::AsHexString;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", rename_all = "PascalCase", content = "value")]
@@ -10,9 +10,9 @@ use serde::{Deserialize, Serialize};
 pub enum AssetId {
     PublicCloud(Uuid),
     PrivateCloud {
-        #[serde(serialize_with = "serialize_object_id_as_hex_string")]
+        #[serde(with = "AsHexString")]
         asset_id: ObjectId,
-        #[serde(serialize_with = "serialize_object_id_as_hex_string")]
+        #[serde(with = "AsHexString")]
         version_id: ObjectId,
     },
     Local(PathBuf),
