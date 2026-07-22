@@ -126,7 +126,8 @@ mod tests {
                     "translation": [1.0, 2.0, 3.0],
                     "rotation": [0.0, 0.0, 0.0, 1.0],
                     "scale": [1.0, 1.0, 1.0]
-                }
+                },
+                "gravity": true
             }"#;
 
     #[test]
