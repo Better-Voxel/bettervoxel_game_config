@@ -53,8 +53,9 @@ pub enum GameElementTypeDTO {
 
 /// Deserializes via [`PartDTORaw`]: format v1 names the field `anchored`;
 /// v0 files carried the INVERSE as `gravity` (gravity = !anchored).
-/// `can_collide`/`transparency`/`shape` are additive v1 fields — files
-/// without them load with the Roblox defaults (collidable, opaque, block).
+/// `can_collide`/`transparency`/`shape`/`material` are additive v1 fields —
+/// files without them load with the Roblox defaults (collidable, opaque,
+/// block, plastic).
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(try_from = "PartDTORaw")]
 #[cfg_attr(test, derive(PartialEq))]
@@ -66,6 +67,7 @@ pub struct PartDTO {
     pub can_collide: bool,
     pub transparency: f32,
     pub shape: PartShapeDTO,
+    pub material: PartMaterialDTO,
 }
 
 /// The geometric shape of a part (Roblox `PartType`). The mesh AND the
@@ -78,6 +80,23 @@ pub enum PartShapeDTO {
     Cylinder,
     Wedge,
     CornerWedge,
+}
+
+/// The surface material of a part (Roblox `Material`, the signed-off ten).
+/// Rendering derives surface parameters from it (textures may come later).
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum PartMaterialDTO {
+    #[default]
+    Plastic,
+    SmoothPlastic,
+    Wood,
+    Metal,
+    Glass,
+    Neon,
+    Slate,
+    Concrete,
+    Brick,
+    Grass,
 }
 
 fn default_can_collide() -> bool {
@@ -99,6 +118,8 @@ struct PartDTORaw {
     transparency: f32,
     #[serde(default)]
     shape: PartShapeDTO,
+    #[serde(default)]
+    material: PartMaterialDTO,
 }
 
 impl TryFrom<PartDTORaw> for PartDTO {
@@ -117,6 +138,7 @@ impl TryFrom<PartDTORaw> for PartDTO {
             can_collide: raw.can_collide,
             transparency: raw.transparency,
             shape: raw.shape,
+            material: raw.material,
         })
     }
 }
@@ -227,8 +249,8 @@ pub struct StructureDTO {
 #[cfg(test)]
 mod tests {
     use crate::dto::hierarchy_dto::{
-        GameElementDTO, ModelDTO, PartDTO, PartShapeDTO, PlayerPrefabDTO, PointLightDTO,
-        SpotLightDTO,
+        GameElementDTO, ModelDTO, PartDTO, PartMaterialDTO, PartShapeDTO, PlayerPrefabDTO,
+        PointLightDTO, SpotLightDTO,
     };
     use bevy_color::Color;
     use bevy_color::palettes::css::AQUA;
@@ -244,6 +266,7 @@ mod tests {
         can_collide: true,
         transparency: 0.0,
         shape: PartShapeDTO::Block,
+        material: PartMaterialDTO::Plastic,
     };
 
     // Format v0: parts carried `gravity` = !anchored.
@@ -334,10 +357,27 @@ mod tests {
             can_collide: false,
             transparency: 0.5,
             shape: PartShapeDTO::Block,
+            material: PartMaterialDTO::Plastic,
         };
         let back: PartDTO =
             serde_json::from_str(&serde_json::to_string(&ghost).unwrap()).unwrap();
         assert_eq!(ghost, back);
+    }
+
+    // The additive v1 material field defaults to Plastic and round-trips.
+    #[test]
+    fn material_defaults_to_plastic_and_round_trips() {
+        let part: PartDTO = serde_json::from_str(PART_JSON_V0).unwrap();
+        assert_eq!(part.material, PartMaterialDTO::Plastic);
+
+        let neon = PartDTO {
+            material: PartMaterialDTO::Neon,
+            ..serde_json::from_str(PART_JSON_V1).unwrap()
+        };
+        let json = serde_json::to_value(&neon).unwrap();
+        assert_eq!(json["material"], Value::String("Neon".to_string()));
+        let back: PartDTO = serde_json::from_value(json).unwrap();
+        assert_eq!(neon, back);
     }
 
     // The additive v1 shape field defaults to Block and round-trips.
@@ -354,6 +394,7 @@ mod tests {
             can_collide: true,
             transparency: 0.0,
             shape: PartShapeDTO::Ball,
+            material: PartMaterialDTO::Plastic,
         };
         let json = serde_json::to_value(&ball).unwrap();
         assert_eq!(json["shape"], Value::String("Ball".to_string()));
@@ -424,6 +465,7 @@ mod tests {
                 can_collide: true,
                 transparency: 0.0,
                 shape: PartShapeDTO::Block,
+                material: PartMaterialDTO::Plastic,
             }),
             children: None,
             attributes: None,
