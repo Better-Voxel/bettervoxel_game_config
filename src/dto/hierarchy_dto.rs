@@ -43,6 +43,8 @@ pub enum GameElementTypeDTO {
     SpawnLocation(PartDTO),
     /// Makes its parent (part or model subtree) clickable.
     ClickDetector(ClickDetectorDTO),
+    /// Rigidly welds two parts into one physics assembly.
+    WeldConstraint(WeldConstraintDTO),
     /// An audio emitter — positional when parented to a part.
     Sound(SoundDTO),
     SpotLight(SpotLightDTO),
@@ -157,6 +159,24 @@ pub struct ClickDetectorDTO {
 
 fn default_max_activation_distance() -> f32 {
     10.0
+}
+
+/// Rigid weld between two parts (Roblox `WeldConstraint`), referenced by
+/// instance id and resolved once the whole hierarchy is spawned. Welded
+/// parts simulate as ONE assembly.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct WeldConstraintDTO {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub part0: Option<InstanceId>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub part1: Option<InstanceId>,
+    #[serde(default = "default_weld_enabled")]
+    pub enabled: bool,
+}
+
+fn default_weld_enabled() -> bool {
+    true
 }
 
 /// An audio emitter (Roblox `Sound`): positional when parented to a part.
@@ -520,6 +540,23 @@ mod tests {
         let back: SoundDTO =
             serde_json::from_str(&serde_json::to_string(&tuned).unwrap()).unwrap();
         assert_eq!(tuned, back);
+    }
+
+    #[test]
+    fn weld_constraint_defaults_and_round_trips() {
+        use crate::dto::hierarchy_dto::WeldConstraintDTO;
+        let empty: WeldConstraintDTO = serde_json::from_str("{}").unwrap();
+        assert!(empty.enabled, "welds default enabled");
+        assert!(empty.part0.is_none() && empty.part1.is_none());
+
+        let weld = WeldConstraintDTO {
+            part0: Some(uuid::Uuid::new_v4()),
+            part1: Some(uuid::Uuid::new_v4()),
+            enabled: false,
+        };
+        let back: WeldConstraintDTO =
+            serde_json::from_str(&serde_json::to_string(&weld).unwrap()).unwrap();
+        assert_eq!(weld, back);
     }
 
     #[test]
