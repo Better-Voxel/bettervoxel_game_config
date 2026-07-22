@@ -38,8 +38,8 @@ pub enum GameElementTypeDTO {
     Script(ScriptDTO),
     ModuleScript(ScriptDTO),
     PlayerPrefab(PlayerPrefabDTO),
-    /// A part that doubles as a character spawn point (format v2). Shares
-    /// the part shape — spawn pads are visible, collidable geometry.
+    /// A part that doubles as a character spawn point. Shares the part
+    /// shape — spawn pads are visible, collidable geometry.
     SpawnLocation(PartDTO),
     SpotLight(SpotLightDTO),
     PointLight(PointLightDTO),
