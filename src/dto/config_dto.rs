@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::dto::hierarchy_dto::GameElementDTO;
+use crate::dto::lighting_dto::LightingDTO;
 use crate::dto::terrain_dto::TerrainDTO;
 use crate::dto::type_dto::Type;
 use crate::dto::{ActionDTO, AssetDTO, KeyBindDTO, TypeDTO};
@@ -17,9 +18,10 @@ use crate::dto::{ActionDTO, AssetDTO, KeyBindDTO, TypeDTO};
 /// v1: `version` field, per-element `id`, `anchored`, symmetric attributes
 /// with inline `Table` values, `Model`/`ModuleScript`/`PlayerPrefab` kinds;
 /// later additions while the format is pre-release: `can_collide`/
-/// `transparency` part fields and the `SpawnLocation` kind (files using it
-/// are unreadable by pre-SpawnLocation parsers — the version gates when the
-/// format is next cut, not per addition).
+/// `transparency` part fields, the `SpawnLocation`/`ClickDetector`/`Sound`
+/// kinds, and the optional `lighting` section (files using them are
+/// unreadable by older parsers — the version gates when the format is next
+/// cut, not per addition).
 pub const FORMAT_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -33,6 +35,9 @@ pub struct ConfigDTO {
     pub keybinds: HashMap<String, KeyBindDTO>,
     pub hierarchy: Vec<GameElementDTO>,
     pub terrain: TerrainDTO,
+    /// Global lighting (additive v1 section; absent = engine defaults).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lighting: Option<LightingDTO>,
 }
 
 #[derive(Debug)]
@@ -152,6 +157,7 @@ mod tests {
             keybinds: HashMap::new(),
             hierarchy: Vec::new(),
             terrain: TerrainDTO { skybox: None },
+            lighting: None,
         }
     }
 
