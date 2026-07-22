@@ -43,6 +43,8 @@ pub enum GameElementTypeDTO {
     SpawnLocation(PartDTO),
     /// Makes its parent (part or model subtree) clickable.
     ClickDetector(ClickDetectorDTO),
+    /// An audio emitter — positional when parented to a part.
+    Sound(SoundDTO),
     SpotLight(SpotLightDTO),
     PointLight(PointLightDTO),
     Prop(PropDTO),
@@ -117,6 +119,30 @@ pub struct ClickDetectorDTO {
 
 fn default_max_activation_distance() -> f32 {
     10.0
+}
+
+/// An audio emitter (Roblox `Sound`): positional when parented to a part.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct SoundDTO {
+    pub asset_id: AssetId,
+    #[serde(default = "default_sound_volume")]
+    pub volume: f32,
+    #[serde(default)]
+    pub looped: bool,
+    #[serde(default = "default_playback_speed")]
+    pub playback_speed: f32,
+    /// Whether the sound starts playing when the game loads.
+    #[serde(default)]
+    pub playing: bool,
+}
+
+fn default_sound_volume() -> f32 {
+    0.5
+}
+
+fn default_playback_speed() -> f32 {
+    1.0
 }
 
 /// A grouping with an optional primary part (referenced by instance id).
@@ -386,6 +412,29 @@ mod tests {
             max_activation_distance: 3.5,
         };
         let back: ClickDetectorDTO =
+            serde_json::from_str(&serde_json::to_string(&tuned).unwrap()).unwrap();
+        assert_eq!(tuned, back);
+    }
+
+    #[test]
+    fn sound_defaults_and_round_trips() {
+        use crate::dto::hierarchy_dto::SoundDTO;
+        let minimal: SoundDTO =
+            serde_json::from_str(r#"{ "asset_id": { "type": "Local", "value": "boom.ogg" } }"#)
+                .unwrap();
+        assert_eq!(minimal.volume, 0.5);
+        assert!(!minimal.looped);
+        assert_eq!(minimal.playback_speed, 1.0);
+        assert!(!minimal.playing);
+
+        let tuned = SoundDTO {
+            asset_id: crate::dto::asset_dto::AssetId::Local("music.ogg".into()),
+            volume: 0.8,
+            looped: true,
+            playback_speed: 1.25,
+            playing: true,
+        };
+        let back: SoundDTO =
             serde_json::from_str(&serde_json::to_string(&tuned).unwrap()).unwrap();
         assert_eq!(tuned, back);
     }
