@@ -23,5 +23,9 @@ pub enum Type {
     STRING(Option<String>),
 
     // ARRAY(Vec<Type>),
+    /// Reference to a NAMED type from the config's type registry.
     CUSTOM(String),
+    /// Inline nested fields WITH values (format v1) — lets attribute values
+    /// (including nested tables) round-trip without a registry entry.
+    TABLE(HashMap<String, Type>),
 }
