@@ -46,6 +46,8 @@ pub enum GameElementTypeDTO {
 
 /// Deserializes via [`PartDTORaw`]: format v1 names the field `anchored`;
 /// v0 files carried the INVERSE as `gravity` (gravity = !anchored).
+/// `can_collide`/`transparency` are additive v1 fields — files without them
+/// load with the Roblox defaults (collidable, opaque).
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(try_from = "PartDTORaw")]
 #[cfg_attr(test, derive(PartialEq))]
@@ -54,6 +56,12 @@ pub struct PartDTO {
     pub color: Color,
     pub position: Transform,
     pub anchored: bool,
+    pub can_collide: bool,
+    pub transparency: f32,
+}
+
+fn default_can_collide() -> bool {
+    true
 }
 
 #[derive(Deserialize)]
@@ -65,6 +73,10 @@ struct PartDTORaw {
     anchored: Option<bool>,
     #[serde(default)]
     gravity: Option<bool>,
+    #[serde(default = "default_can_collide")]
+    can_collide: bool,
+    #[serde(default)]
+    transparency: f32,
 }
 
 impl TryFrom<PartDTORaw> for PartDTO {
@@ -80,6 +92,8 @@ impl TryFrom<PartDTORaw> for PartDTO {
             color: raw.color,
             position: raw.position,
             anchored,
+            can_collide: raw.can_collide,
+            transparency: raw.transparency,
         })
     }
 }
@@ -166,6 +180,8 @@ mod tests {
         color: Color::Srgba(AQUA),
         position: Transform::from_xyz(1., 2., 3.),
         anchored: false,
+        can_collide: true,
+        transparency: 0.0,
     };
 
     // Format v0: parts carried `gravity` = !anchored.
@@ -238,6 +254,27 @@ mod tests {
         let value = serde_json::to_value(PART).unwrap();
         assert_eq!(value.get("anchored"), Some(&Value::Bool(false)));
         assert!(value.get("gravity").is_none());
+    }
+
+    // The additive v1 fields default when absent (both v0 and early-v1
+    // files) and round-trip when set.
+    #[test]
+    fn can_collide_and_transparency_default_and_round_trip() {
+        let part: PartDTO = serde_json::from_str(PART_JSON_V0).unwrap();
+        assert!(part.can_collide, "missing can_collide must default to true");
+        assert_eq!(part.transparency, 0.0, "missing transparency must default to 0");
+
+        let ghost = PartDTO {
+            size: Vec3::ONE,
+            color: Color::Srgba(AQUA),
+            position: Transform::from_xyz(0., 0., 0.),
+            anchored: true,
+            can_collide: false,
+            transparency: 0.5,
+        };
+        let back: PartDTO =
+            serde_json::from_str(&serde_json::to_string(&ghost).unwrap()).unwrap();
+        assert_eq!(ghost, back);
     }
 
     #[test]
