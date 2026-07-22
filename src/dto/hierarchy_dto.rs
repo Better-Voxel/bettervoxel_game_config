@@ -38,6 +38,9 @@ pub enum GameElementTypeDTO {
     Script(ScriptDTO),
     ModuleScript(ScriptDTO),
     PlayerPrefab(PlayerPrefabDTO),
+    /// A part that doubles as a character spawn point (format v2). Shares
+    /// the part shape — spawn pads are visible, collidable geometry.
+    SpawnLocation(PartDTO),
     SpotLight(SpotLightDTO),
     PointLight(PointLightDTO),
     Prop(PropDTO),
@@ -324,6 +327,38 @@ mod tests {
         let out = serde_json::to_value(&element).unwrap();
         let back: GameElementDTO = serde_json::from_value(out.clone()).unwrap();
         assert_eq!(out, serde_json::to_value(&back).unwrap());
+    }
+
+    // Format v2: SpawnLocation is a part-shaped element.
+    #[test]
+    fn spawn_location_round_trips_as_a_part_shape() {
+        let element = GameElementDTO {
+            id: uuid::Uuid::new_v4(),
+            name: "Spawn".to_string(),
+            value: crate::dto::hierarchy_dto::GameElementTypeDTO::SpawnLocation(PartDTO {
+                size: Vec3::new(4.0, 0.5, 4.0),
+                color: Color::Srgba(AQUA),
+                position: Transform::from_xyz(0., 0.25, 0.),
+                anchored: true,
+                can_collide: true,
+                transparency: 0.0,
+            }),
+            children: None,
+            attributes: None,
+        };
+        let json = serde_json::to_value(&element).unwrap();
+        assert_eq!(
+            json["value"]["type"],
+            serde_json::Value::String("SpawnLocation".to_string())
+        );
+        let back: GameElementDTO = serde_json::from_value(json).unwrap();
+        match back.value {
+            crate::dto::hierarchy_dto::GameElementTypeDTO::SpawnLocation(part) => {
+                assert!(part.anchored);
+                assert_eq!(part.size, Vec3::new(4.0, 0.5, 4.0));
+            }
+            other => panic!("expected SpawnLocation, got {other:?}"),
+        }
     }
 
     #[test]

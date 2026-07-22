@@ -15,8 +15,10 @@ use crate::dto::{ActionDTO, AssetDTO, KeyBindDTO, TypeDTO};
 /// v0 (implicit): no `version`, no element ids, parts carried
 /// `gravity = !anchored`, attributes never deserialized.
 /// v1: `version` field, per-element `id`, `anchored`, symmetric attributes
-/// with inline `Table` values, `Model`/`ModuleScript`/`PlayerPrefab` kinds.
-pub const FORMAT_VERSION: u32 = 1;
+/// with inline `Table` values, `Model`/`ModuleScript`/`PlayerPrefab` kinds
+/// (+ additive `can_collide`/`transparency` part fields).
+/// v2: the `SpawnLocation` element kind.
+pub const FORMAT_VERSION: u32 = 2;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigDTO {
