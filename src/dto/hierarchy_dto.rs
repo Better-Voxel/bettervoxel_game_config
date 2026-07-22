@@ -53,8 +53,8 @@ pub enum GameElementTypeDTO {
 
 /// Deserializes via [`PartDTORaw`]: format v1 names the field `anchored`;
 /// v0 files carried the INVERSE as `gravity` (gravity = !anchored).
-/// `can_collide`/`transparency` are additive v1 fields — files without them
-/// load with the Roblox defaults (collidable, opaque).
+/// `can_collide`/`transparency`/`shape` are additive v1 fields — files
+/// without them load with the Roblox defaults (collidable, opaque, block).
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(try_from = "PartDTORaw")]
 #[cfg_attr(test, derive(PartialEq))]
@@ -65,6 +65,19 @@ pub struct PartDTO {
     pub anchored: bool,
     pub can_collide: bool,
     pub transparency: f32,
+    pub shape: PartShapeDTO,
+}
+
+/// The geometric shape of a part (Roblox `PartType`). The mesh AND the
+/// collider derive from it.
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum PartShapeDTO {
+    #[default]
+    Block,
+    Ball,
+    Cylinder,
+    Wedge,
+    CornerWedge,
 }
 
 fn default_can_collide() -> bool {
@@ -84,6 +97,8 @@ struct PartDTORaw {
     can_collide: bool,
     #[serde(default)]
     transparency: f32,
+    #[serde(default)]
+    shape: PartShapeDTO,
 }
 
 impl TryFrom<PartDTORaw> for PartDTO {
@@ -101,6 +116,7 @@ impl TryFrom<PartDTORaw> for PartDTO {
             anchored,
             can_collide: raw.can_collide,
             transparency: raw.transparency,
+            shape: raw.shape,
         })
     }
 }
@@ -211,7 +227,8 @@ pub struct StructureDTO {
 #[cfg(test)]
 mod tests {
     use crate::dto::hierarchy_dto::{
-        GameElementDTO, ModelDTO, PartDTO, PlayerPrefabDTO, PointLightDTO, SpotLightDTO,
+        GameElementDTO, ModelDTO, PartDTO, PartShapeDTO, PlayerPrefabDTO, PointLightDTO,
+        SpotLightDTO,
     };
     use bevy_color::Color;
     use bevy_color::palettes::css::AQUA;
@@ -226,6 +243,7 @@ mod tests {
         anchored: false,
         can_collide: true,
         transparency: 0.0,
+        shape: PartShapeDTO::Block,
     };
 
     // Format v0: parts carried `gravity` = !anchored.
@@ -315,10 +333,32 @@ mod tests {
             anchored: true,
             can_collide: false,
             transparency: 0.5,
+            shape: PartShapeDTO::Block,
         };
         let back: PartDTO =
             serde_json::from_str(&serde_json::to_string(&ghost).unwrap()).unwrap();
         assert_eq!(ghost, back);
+    }
+
+    // The additive v1 shape field defaults to Block and round-trips.
+    #[test]
+    fn shape_defaults_to_block_and_round_trips() {
+        let part: PartDTO = serde_json::from_str(PART_JSON_V0).unwrap();
+        assert_eq!(part.shape, PartShapeDTO::Block, "missing shape must default");
+
+        let ball = PartDTO {
+            size: Vec3::splat(2.0),
+            color: Color::Srgba(AQUA),
+            position: Transform::from_xyz(0., 0., 0.),
+            anchored: false,
+            can_collide: true,
+            transparency: 0.0,
+            shape: PartShapeDTO::Ball,
+        };
+        let json = serde_json::to_value(&ball).unwrap();
+        assert_eq!(json["shape"], Value::String("Ball".to_string()));
+        let back: PartDTO = serde_json::from_value(json).unwrap();
+        assert_eq!(ball, back);
     }
 
     #[test]
@@ -383,6 +423,7 @@ mod tests {
                 anchored: true,
                 can_collide: true,
                 transparency: 0.0,
+                shape: PartShapeDTO::Block,
             }),
             children: None,
             attributes: None,
