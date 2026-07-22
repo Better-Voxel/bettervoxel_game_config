@@ -41,6 +41,8 @@ pub enum GameElementTypeDTO {
     /// A part that doubles as a character spawn point. Shares the part
     /// shape — spawn pads are visible, collidable geometry.
     SpawnLocation(PartDTO),
+    /// Makes its parent (part or model subtree) clickable.
+    ClickDetector(ClickDetectorDTO),
     SpotLight(SpotLightDTO),
     PointLight(PointLightDTO),
     Prop(PropDTO),
@@ -103,6 +105,19 @@ impl TryFrom<PartDTORaw> for PartDTO {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FolderDTO {}
+
+/// A click region on the parent object. Distances are meters, measured from
+/// the clicking character.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct ClickDetectorDTO {
+    #[serde(default = "default_max_activation_distance")]
+    pub max_activation_distance: f32,
+}
+
+fn default_max_activation_distance() -> f32 {
+    10.0
+}
 
 /// A grouping with an optional primary part (referenced by instance id).
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -359,6 +374,20 @@ mod tests {
             }
             other => panic!("expected SpawnLocation, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn click_detector_defaults_and_round_trips() {
+        use crate::dto::hierarchy_dto::ClickDetectorDTO;
+        let detector: ClickDetectorDTO = serde_json::from_str("{}").unwrap();
+        assert_eq!(detector.max_activation_distance, 10.0);
+
+        let tuned = ClickDetectorDTO {
+            max_activation_distance: 3.5,
+        };
+        let back: ClickDetectorDTO =
+            serde_json::from_str(&serde_json::to_string(&tuned).unwrap()).unwrap();
+        assert_eq!(tuned, back);
     }
 
     #[test]
